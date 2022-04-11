@@ -1,0 +1,7 @@
+cidr_blocks_whitelist = ["123.123.123.123/32",
+  "111.111.111.111/32",
+]
+tenant_id           = "7bb1a8e5-as21-489d-dw21-a50210ae3970"
+developer_id        = "123fa7f3-23ad-4888-klow-7aa33681e815"
+resource_group_name = "burri-rg"
+project             = "burritfdemo"
