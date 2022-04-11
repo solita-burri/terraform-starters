@@ -1,0 +1,96 @@
+parameters:
+  - name: environment
+  - name: variableGroupName
+
+stages:
+- stage: build_environment
+  jobs:
+  - job: build_environment
+    steps:
+    - task: CopyFiles@2
+      displayName: 'Build Terraform artifact'
+      inputs:
+        SourceFolder: 'infra/terraform'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Terraform'
+        publishLocation: 'Container'
+- stage: terraform_plan
+  dependsOn: build_environment
+  condition: succeeded('build_environment')
+  variables:
+    - group:  ${{ parameters.variableGroupName }} 
+  jobs:
+  - job: Build
+    steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Artifact'
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'Terraform'
+        downloadPath: '$(System.ArtifactsDirectory)'  
+
+    - task: Bash@3
+      name: tf_plan
+      displayName: 'Terraform plan'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform init -backend-config=config/backend/${{ parameters.environment }}.json
+          terraform plan -detailed-exitcode -out=tfplan -input=false -var-file="config/tf-vars/${{ parameters.environment }}.tfvars"
+          exitcode=$?
+          echo "##vso[task.setvariable variable=terraform_exitcode;isOutput=true]$exitcode"
+          if [ "$exitcode" -eq 1 ]; then
+            exit $exitcode
+          else 
+            exit 0
+          fi
+        workingDirectory: '$(System.ArtifactsDirectory)/Terraform/'
+      env:
+          ARM_CLIENT_ID: $(ArmClientId)
+          ARM_CLIENT_SECRET: $(ArmClientSecret)
+          ARM_SUBSCRIPTION_ID: $(ArmSubscriptionId)
+          ARM_TENANT_ID: $(ArmTenantId)
+          TF_IN_AUTOMATION: true   
+
+- stage: terraform_apply
+  dependsOn: terraform_plan
+  # Terraform exitcode 2 means that planning was successful and there where changes to be done
+  condition: eq(stageDependencies.terraform_plan.outputs['Build.tf_plan.terraform_exitcode'], 2)
+  variables:
+    - group: ${{ parameters.variableGroupName }} 
+  jobs:
+  - deployment: 
+    environment: 'my_project_${{ parameters.environment }}'
+    strategy:
+      runOnce:
+        deploy:  
+          steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Download Artifact'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'Terraform'
+              downloadPath: '$(System.ArtifactsDirectory)'         
+          - task: Bash@3
+            displayName: 'Terraform apply'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform init -backend-config=config/backend/${{ parameters.environment }}.json
+                terraform plan -out=tfplan -input=false -var-file="config/tf-vars/${{ parameters.environment }}.tfvars"
+                terraform apply -input=false tfplan 
+              workingDirectory: '$(System.ArtifactsDirectory)/Terraform/'
+            env:
+                ARM_CLIENT_ID: $(ArmClientId)
+                ARM_CLIENT_SECRET: $(ArmClientSecret)
+                ARM_SUBSCRIPTION_ID: $(ArmSubscriptionId)
+                ARM_TENANT_ID: $(ArmTenantId)
+                TF_IN_AUTOMATION: true
+
+
+                      
