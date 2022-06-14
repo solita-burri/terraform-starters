@@ -18,6 +18,7 @@ data "azurerm_key_vault" "kv" {
   resource_group_name = var.resource_group_name
 }
 
+# First we create a storage account with a blob container
 resource "azurerm_storage_account" "log-storage" {
   name                     = "${var.application_name}log${var.environment}st"
   resource_group_name      = var.resource_group_name
@@ -32,12 +33,12 @@ resource "azurerm_storage_container" "log-container" {
   storage_account_name = azurerm_storage_account.log-storage.name
 }
 
-
+# Then we generate an appropriate Shared Access Signature
 data "azurerm_storage_account_blob_container_sas" "debug-log" {
   connection_string = azurerm_storage_account.log-storage.primary_connection_string
   container_name    = azurerm_storage_container.log-container.name
-  start             = "2022-04-27" 
-  expiry            = "2040-01-01" # Verify so the much your needs / policies
+  start             = "2022-04-27"
+  expiry            = "2040-01-01" # Verify so these match your needs / policies
   permissions {
     read   = true
     add    = true
@@ -48,7 +49,7 @@ data "azurerm_storage_account_blob_container_sas" "debug-log" {
   }
 }
 
-# This is the the magic part
+# This is the the magic part of formatting the SAS url correctly for App Service
 resource "azurerm_key_vault_secret" "debug-log-sas" {
   name         = "debug-log-sas"
   value        = join("", [azurerm_storage_account.log-storage.primary_blob_endpoint, azurerm_storage_container.log-container.name, data.azurerm_storage_account_blob_container_sas.debug-log.sas])
@@ -73,9 +74,9 @@ resource "azurerm_app_service" "api_app" {
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
   https_only          = true
 
-  site_config {  
-    ftps_state                  = "FtpsOnly"
-    always_on                   = true
+  site_config {
+    ftps_state = "FtpsOnly"
+    always_on  = true
   }
 
   identity {
