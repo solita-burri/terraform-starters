@@ -1,0 +1,17 @@
+trigger: none
+
+parameters:
+  - name: environment
+    default: prod
+  - name: variableGroupName
+    default: app-infra-library
+  - name: agentPool
+    default: SelfHosted
+
+extends:
+    template: templates/deploy-infra.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      variableGroupName: ${{ parameters.variableGroupName }}
+      agentPool: ${{ parameters.agentPool }}
+      terraformVersion: "1.3.5"

@@ -1,0 +1,20 @@
+
+rg_name     = "rg-DEMO-test-solution"
+environment = "test"
+
+# DB admin information
+db_admin_username = "solutionadmin"
+
+network_config = {
+  rg_name                = "rg-DEMO-h01s02-test-network"
+  vnet_name              = "vnet-DEMO-h01s02-test"
+  endpoint_subnet        = "snet-DEMO-h01s02-test-endpoint"
+  shir_subnet            = "snet-DEMO-h01s02-test-shir"
+  landing_subnet         = "snet-DEMO-h01s02-test-landing"
+  sql_endpoint           = "10.159.44.132"
+  landing_blob_endpoint  = "10.159.44.4"
+}
+
+shir_username = "solutionadmin"
+
+admin_object_id = "***" # Admin User Group

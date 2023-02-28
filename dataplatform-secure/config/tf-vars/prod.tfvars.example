@@ -1,0 +1,20 @@
+
+rg_name     = "rg-DEMO-prod-solution"
+environment = "prod"
+
+# DB admin information
+db_admin_username = "solutionadmin"
+
+network_config = {
+  rg_name                = "rg-DEMO-h01s01-prod-network"
+  vnet_name              = "vnet-DEMO-h01s01-prod"
+  endpoint_subnet        = "snet-DEMO-h01s01-prod-endpoint"
+  shir_subnet            = "snet-DEMO-h01s01-prod-shir"
+  landing_subnet         = "snet-DEMO-h01s01-prod-landing"
+  sql_endpoint           = "10.152.68.132"
+  landing_blob_endpoint  = "10.152.68.4"
+}
+
+shir_username = "solutionadmin"
+
+admin_object_id = "***" # Admin User Group

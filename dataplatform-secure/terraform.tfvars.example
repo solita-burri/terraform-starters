@@ -1,0 +1,12 @@
+# This file is loaded due convention by Terraform
+
+####################### USE THIS FILE FOR #######################
+######  1. Variables that are common to all environments  #######    
+#################################################################
+
+# common variables
+location = "westeurope"
+service  = "solution"
+org_id   = "DEMO"
+
+shir_username     = "solutionadmin"

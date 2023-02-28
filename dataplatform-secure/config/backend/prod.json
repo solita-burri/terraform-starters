@@ -1,0 +1,6 @@
+{
+    "resource_group_name": "rg-DEMO-prod-solution",
+    "storage_account_name": "sademoprodtf",
+    "container_name": "tfstate",
+    "key": "terraform.tfstate"
+}
