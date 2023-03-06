@@ -16,7 +16,7 @@ Private DNS records are created only for Data Factory & Azure SQL. For the blob 
 
 ### ADF
 
-A
+ADF has a system-assigned and an user-assigned identity. The user-assigned identity is required due the customer-managed key. For auth purposes towards other resources both identities can be used, however terraform does not support user-assigned identities for that purpose yet.
 
 ### Identities
 
