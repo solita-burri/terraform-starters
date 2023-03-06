@@ -67,19 +67,16 @@ resource "azurerm_private_endpoint" "mssql" {
     subresource_name   = "sqlServer"
     private_ip_address = var.network_config.sql_endpoint
   }
+
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.mssql.id]
+  }
 }
 # psql Privatelink private zone
 resource "azurerm_private_dns_zone" "mssql" {
   name                = "database.windows.net"
   resource_group_name = data.azurerm_resource_group.main.name
-}
-
-resource "azurerm_private_dns_a_record" "mssql" {
-  name                = azurerm_mssql_server.main.name
-  zone_name           = azurerm_private_dns_zone.mssql.name
-  resource_group_name = data.azurerm_resource_group.main.name
-  ttl                 = 300
-  records             = [azurerm_private_endpoint.mssql.private_service_connection[0].private_ip_address]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "mssql" {

@@ -27,20 +27,16 @@ resource "azurerm_private_endpoint" "datafactory" {
     is_manual_connection           = false
     subresource_names              = ["datafactory"]
   }
+  private_dns_zone_group {
+    name                 = "default"
+    private_dns_zone_ids = [azurerm_private_dns_zone.datafactory.id]
+  }
 }
 
 # Privatelink private zone
 resource "azurerm_private_dns_zone" "datafactory" {
   name                = "privatelink.datafactory.azure.net"
   resource_group_name = data.azurerm_resource_group.main.name
-}
-
-resource "azurerm_private_dns_a_record" "datafactory" {
-  name                = azurerm_data_factory.main.name
-  zone_name           = azurerm_private_dns_zone.datafactory.name
-  resource_group_name = data.azurerm_resource_group.main.name
-  ttl                 = 300
-  records             = [azurerm_private_endpoint.datafactory.private_service_connection[0].private_ip_address]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "datafactory" {

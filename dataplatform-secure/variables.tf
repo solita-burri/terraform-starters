@@ -71,7 +71,7 @@ variable "cmk_opts" {
 }
 
 variable "shir_sku" {
-  type = string
+  type        = string
   description = "SKU for the Self Hosted Integration Runtime"
-  default = "Standard_D4as_v5"  
+  default     = "Standard_D4as_v5"
 }
